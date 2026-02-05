@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - Manage About</title>
+  <link rel="stylesheet" href="assets/newcss.css">
+  <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.8/css/line.css" />
+  <style>
+    body { background: var(--body-color); font-family: var(--body-font); }
+    .admin-container { max-width: 900px; margin: 4rem auto; background: #fff; border-radius: 2rem; box-shadow: 0 8px 32px rgba(0,0,0,0.10); padding: 3rem; }
+    .header-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2.5rem; }
+    .header-title { font-size: 2.3rem; color: var(--first-color); font-weight: 700; letter-spacing: 1px; }
+    .back-btn { background: var(--first-color); color: #fff; border: none; border-radius: 0.7rem; padding: 0.7rem 2rem; font-size: 1.1rem; cursor: pointer; transition: background 0.2s; display: flex; align-items: center; gap: 0.7rem; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .back-btn:hover { background: var(--first-color-alt); }
+    .about-grid { display: grid; grid-template-columns: 1fr 2fr; gap: 2.5rem; align-items: center; margin-bottom: 2rem; }
+    .about-img { width: 100%; max-width: 220px; border-radius: 1.5rem; box-shadow: 0 4px 24px rgba(0,0,0,0.07); }
+    .about-data { display: flex; flex-direction: column; gap: 1.2rem; }
+    .about-description { font-size: 1.08rem; color: var(--text-color); margin-bottom: 1rem; }
+    .about-info { display: flex; gap: 2rem; margin-bottom: 1rem; }
+    .about-info-block { background: var(--container-color); border-radius: 1rem; padding: 1rem 1.5rem; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.07); }
+    .about-info-title { font-size: 1.1rem; font-weight: 700; color: var(--first-color); }
+    .about-info-name { font-size: 0.98rem; color: var(--text-color); }
+    .about-buttons { margin-top: 1rem; }
+    .about-buttons .button { font-size: 1.08rem; border-radius: 0.7rem; }
+    .remove-btn { background: #f44336; color: #fff; border: none; border-radius: 0.7rem; padding: 0.3rem 0.8rem; cursor: pointer; transition: background 0.2s; font-size: 1rem; }
+    .remove-btn:hover { background: #d32f2f; }
+    .add-btn, .save-btn { background: var(--first-color); color: #fff; border: none; border-radius: 0.7rem; padding: 0.7rem 2rem; font-size: 1.1rem; cursor: pointer; margin-top: 1rem; transition: background 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .add-btn:hover, .save-btn:hover { background: var(--first-color-alt); }
+    @media (max-width: 900px) {
+      .admin-container { padding: 1rem; }
+      .about-grid { grid-template-columns: 1fr; gap: 1.5rem; }
+      .header-title { font-size: 1.3rem; }
+    }
+    .toast {
+      position: fixed;
+      top: 2rem;
+      right: 2rem;
+      background: var(--first-color);
+      color: #fff;
+      padding: 1rem 2rem;
+      border-radius: 0.5rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+      font-size: 1rem;
+      z-index: 9999;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+    .toast.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .modal-confirm {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 99999;
+    }
+    .modal-content {
+      background: #222;
+      color: #fff;
+      border-radius: 1rem;
+      padding: 2rem 2.5rem;
+      min-width: 320px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+      text-align: center;
+    }
+    .add-btn, .remove-btn {
+      min-width: 90px;
+    }
+  </style>
+</head>
+<body>
+  <div class="admin-container">
+    <div class="header-bar">
+      <span class="header-title"><i class="uil uil-user"></i> Manage About Info</span>
+      <div>
+        <button class="back-btn" onclick="window.location.href='admin-dashboard.html'"><i class="uil uil-arrow-left"></i> Back</button>
+      </div>
+    </div>
+    <form onsubmit="saveAboutInfo();return false;">
+      <div class="about-grid">
+        <div>
+          <img id="aboutImgPreview" src="assets/img/suha pic.jpg" alt="" class="about-img" />
+          <input type="file" id="aboutImgUpload" accept="image/*" style="margin-top:1rem;">
+        </div>
+        <div class="about-data">
+          <textarea id="aboutDescription" class="about-description" rows="5">I'm a first-year HND Software Engineering student at Esoft Metro Campus, Jaffna, passionate about technology and software development. With a self-motivated, can-do attitude, I thrive in dynamic environments. Eager to learn and enhance my skills, I aim to contribute effectively to the tech industry and take on new challenges that help me grow.</textarea>
+          <div class="about-info">
+            <div class="about-info-block">
+              <span class="about-info-title">Online 24/7</span><br>
+              <span class="about-info-name">Support</span>
+            </div>
+            <div class="about-info-block">
+              <span class="about-info-title">48+</span><br>
+              <span class="about-info-name">Projects</span>
+            </div>
+            <div class="about-info-block">
+              <span class="about-info-title">02+</span><br>
+              <span class="about-info-name">Years experience</span>
+            </div>
+          </div>
+          <div class="about-buttons">
+            <a download href="assets/CV pdf.pdf" class="button button--flex">
+              Download CV<i class="uil uil-download button__icon"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+      <button class="save-btn" type="submit"><i class="uil uil-save"></i> Save</button>
+    </form>
+  </div>
+  <div id="toast" class="toast">Saved!</div>
+  <div id="modalConfirm" class="modal-confirm" style="display:none;">
+    <div class="modal-content">
+      <span id="modalMessage">Are you sure?</span>
+      <div style="margin-top:1.5rem; display:flex; gap:1rem; justify-content:flex-end;">
+        <button class="add-btn" id="modalOk">OK</button>
+        <button class="remove-btn" id="modalCancel">Cancel</button>
+      </div>
+    </div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script>
+    // Supabase config (updated)
+    const SUPABASE_URL = 'https://ezbwbhriulkxlrhioknz.supabase.co';
+    const SUPABASE_KEY = 'your-anon-key'; // Replace with your actual anon/public key from Supabase dashboard
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    // Auth check
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session) window.location.href = 'admin-login.html';
+    });
+
+    // Fetch About info from Supabase
+    async function fetchAboutInfo() {
+      const { data, error } = await supabase.from('about').select('*').single();
+      if (data) {
+        document.getElementById('aboutDescription').value = data.description || '';
+        document.getElementById('aboutImgPreview').src = data.img_url || 'assets/img/about.jpg';
+      }
+      if (error) showToast('Error loading About info');
+    }
+    // Save About info to Supabase
+    async function saveAboutInfo() {
+      const description = escapeHTML(document.getElementById('aboutDescription').value.trim());
+      const img_url = document.getElementById('aboutImgPreview').src;
+      const { error } = await supabase.from('about').upsert({
+        id: 1, description, img_url
+      });
+      if (!error) showToast('About info saved!');
+      else showToast('Error saving About info');
+    }
+    // On page load, fetch data
+    window.onload = function() {
+      fetchAboutInfo();
+    };
+    // On form submit, save data
+    document.querySelector('form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      saveAboutInfo();
+    });
+    // Image upload/preview
+    document.getElementById('aboutImgUpload').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        document.getElementById('aboutImgPreview').src = evt.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+    function escapeHTML(str) {
+      return str.replace(/[&<>'"/]/g, function(tag) {
+        const chars = {'&':'&amp;','<':'&lt;','>':'&gt;','\'':'&#39;','"':'&quot;','/':'&#x2F;'};
+        return chars[tag] || tag;
+      });
+    }
+    document.querySelectorAll('form textarea').forEach(function(textarea) {
+      textarea.addEventListener('input', function() {
+        this.value = escapeHTML(this.value);
+      });
+    });
+    function showToast(msg) {
+      var toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(function(){ toast.classList.remove('show'); }, 2000);
+    }
+    function showModalConfirm(message, onOk) {
+      document.getElementById('modalMessage').textContent = message;
+      document.getElementById('modalConfirm').style.display = 'flex';
+      const okBtn = document.getElementById('modalOk');
+      const cancelBtn = document.getElementById('modalCancel');
+      function closeModal() {
+        document.getElementById('modalConfirm').style.display = 'none';
+        okBtn.onclick = null;
+        cancelBtn.onclick = null;
+      }
+      okBtn.onclick = function() {
+        closeModal();
+        if (onOk) onOk();
+      };
+      cancelBtn.onclick = function() {
+        closeModal();
+      };
+    }
+  </script>
+</body>
+</html>

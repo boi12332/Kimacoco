@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - Manage Qualifications</title>
+  <link rel="stylesheet" href="assets/newcss.css">
+  <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.8/css/line.css" />
+  <style>
+    body { background: var(--body-color); font-family: var(--body-font); }
+    .admin-container { max-width: 1100px; margin: 4rem auto; background: #fff; border-radius: 2rem; box-shadow: 0 8px 32px rgba(0,0,0,0.10); padding: 3rem; }
+    .header-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2.5rem; }
+    .header-title { font-size: 2.3rem; color: var(--first-color); font-weight: 700; letter-spacing: 1px; }
+    .back-btn { background: var(--first-color); color: #fff; border: none; border-radius: 0.7rem; padding: 0.7rem 2rem; font-size: 1.1rem; cursor: pointer; transition: background 0.2s; display: flex; align-items: center; gap: 0.7rem; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .back-btn:hover { background: var(--first-color-alt); }
+    .add-qualification-btn { background: var(--first-color-alt); color: #fff; border: none; border-radius: 0.7rem; padding: 0.7rem 2rem; font-size: 1.1rem; cursor: pointer; margin-left: 1rem; transition: background 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .add-qualification-btn:hover { background: var(--first-color); }
+    .qualification-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 2.5rem; }
+    .qualification-card { background: var(--body-color); border-radius: 1.5rem; box-shadow: 0 4px 24px rgba(0,0,0,0.07); padding: 2rem; display: flex; flex-direction: column; gap: 1.2rem; transition: box-shadow 0.2s, transform 0.2s; }
+    .qualification-card:hover { box-shadow: 0 8px 32px rgba(0,0,0,0.12); transform: translateY(-4px) scale(1.02); }
+    .qualification-title { font-size: 1.25rem; font-weight: 700; color: var(--title-color); display: flex; align-items: center; gap: 0.7rem; margin-bottom: 0.5rem; }
+    .qualification-title i { font-size: 1.7rem; color: var(--first-color); }
+    .qualification-details { margin-bottom: 1rem; color: var(--text-color); }
+    .qualification-actions { display: flex; gap: 1rem; margin-bottom: 1rem; }
+    .remove-btn { background: #f44336; color: #fff; border: none; border-radius: 0.7rem; padding: 0.3rem 0.8rem; cursor: pointer; transition: background 0.2s; font-size: 1rem; }
+    .remove-btn:hover { background: #d32f2f; }
+    .add-btn, .save-btn { background: var(--first-color); color: #fff; border: none; border-radius: 0.7rem; padding: 0.7rem 2rem; font-size: 1.1rem; cursor: pointer; margin-top: 1rem; transition: background 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .add-btn:hover, .save-btn:hover { background: var(--first-color-alt); }
+    @media (max-width: 700px) {
+      .admin-container { padding: 1rem; }
+      .qualification-grid { grid-template-columns: 1fr; }
+      .header-title { font-size: 1.3rem; }
+    }
+    .toast {
+      position: fixed;
+      top: 2rem;
+      right: 2rem;
+      background: var(--first-color);
+      color: #fff;
+      padding: 1rem 2rem;
+      border-radius: 0.5rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+      font-size: 1rem;
+      z-index: 9999;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+    .toast.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .modal-confirm {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 99999;
+    }
+    .modal-content {
+      background: #222;
+      color: #fff;
+      border-radius: 1rem;
+      padding: 2rem 2.5rem;
+      min-width: 320px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+      text-align: center;
+    }
+    .add-btn, .remove-btn {
+      min-width: 90px;
+    }
+  </style>
+</head>
+<body>
+  <div class="admin-container">
+    <div class="header-bar">
+      <span class="header-title"><i class="uil uil-graduation-cap"></i> Manage Qualifications</span>
+      <div>
+        <button class="back-btn" onclick="window.location.href='admin-dashboard.html'"><i class="uil uil-arrow-left"></i> Back</button>
+        <button class="add-qualification-btn" onclick="showAddQualification()"><i class="uil uil-plus"></i> Add Qualification</button>
+      </div>
+    </div>
+    <form onsubmit="saveAllQualifications();return false;">
+      <div id="addQualificationForm" style="display:none; margin-bottom:2rem;">
+        <div style="display:flex; gap:1rem; margin-bottom:1rem;">
+          <input type="text" id="newQualificationTitle" placeholder="Title">
+          <input type="text" id="newQualificationSubtitle" placeholder="Subtitle">
+          <input type="text" id="newQualificationYear" placeholder="Year">
+        </div>
+        <button type="button" class="add-btn" onclick="addQualification()"><i class="uil uil-plus"></i> Add Qualification</button>
+      </div>
+      <div class="qualification-grid" id="qualificationGroups"></div>
+      <button class="save-btn" type="submit"><i class="uil uil-save"></i> Save All</button>
+    </form>
+    <div id="toast" class="toast">Saved!</div>
+    <div id="modalConfirm" class="modal-confirm" style="display:none;">
+      <div class="modal-content">
+        <span id="modalMessage">Are you sure?</span>
+        <div style="margin-top:1.5rem; display:flex; gap:1rem; justify-content:flex-end;">
+          <button class="add-btn" id="modalOk">OK</button>
+          <button class="remove-btn" id="modalCancel">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script>
+    // Supabase config (updated)
+    const SUPABASE_URL = 'https://ezbwbhriulkxlrhioknz.supabase.co';
+    const SUPABASE_KEY = 'your-anon-key'; // Replace with your actual anon/public key from Supabase dashboard
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    // Auth check
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session) window.location.href = 'admin-login.html';
+    });
+    // Fetch and save Qualifications
+    async function fetchQualifications() {
+      const { data, error } = await supabase.from('qualifications').select('*');
+      if (data) {
+        // Populate qualifications grid here
+      }
+      if (error) showToast('Error loading Qualifications');
+    }
+    async function saveQualifications() {
+      // Gather and sanitize qualifications info
+      const { error } = await supabase.from('qualifications').upsert([/* ...qualifications array */]);
+      if (!error) showToast('Qualifications saved!');
+      else showToast('Error saving Qualifications');
+    }
+    window.onload = function() { fetchQualifications(); };
+    document.querySelector('form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      saveQualifications();
+    });
+    function escapeHTML(str) {
+      return str.replace(/[&<>'"/]/g, function(tag) {
+        const chars = {'&':'&amp;','<':'&lt;','>':'&gt;','\'':'&#39;','"':'&quot;','/':'&#x2F;'};
+        return chars[tag] || tag;
+      });
+    }
+    document.querySelectorAll('form input, form textarea').forEach(function(el) {
+      el.addEventListener('input', function() {
+        this.value = escapeHTML(this.value);
+      });
+    });
+    const defaultQualifications = [
+      {
+        title: "SSLC",
+        subtitle: "S.V.S High School",
+        year: "2019",
+        icon: "uil uil-graduation-cap",
+        details: [
+          "Subjects studied: Science, Maths, English, Social Studies, Kannada, Hindi.",
+          "Scored 91%",
+          "Came runners up in inter-school Ball Badminton"
+        ]
+      },
+      {
+        title: "Class 12th",
+        subtitle: "Vidyodaya Pre University College",
+        year: "2021",
+        icon: "uil uil-graduation-cap",
+        details: [
+          "Subjects studied: Physics, Chemistry, Maths, English, Statistics, Hindi.",
+          "Scored 87.5%"
+        ]
+      },
+      {
+        title: "College",
+        subtitle: "Canara Engineering College, Mangalore",
+        year: "2021 - 2025",
+        icon: "uil uil-university",
+        details: [
+          "Studying core subjects of IT including DSA, Embedded systems, Design analysis and algorithm, Operating systems, and Computer architecture.",
+          "Scored an aggregate of 8.50 CGPA till now.",
+          "Student coordinator in media and publication club of the college.",
+          "Club Advisor for GeekHub.",
+          "CodeBlaze hackathon winners under open innovation.",
+          "Runners in Edu-Vitality Hackathon in the track of AI in Education.",
+          "Finalist in Dark Pattern Buster Hackathon conducted by Department of Consumer Affairs of India."
+        ]
+      }
+    ];
+    function getAllQualifications() {
+      const quals = localStorage.getItem('allQualifications');
+      return quals ? JSON.parse(quals) : defaultQualifications;
+    }
+    function setAllQualifications(quals) {
+      localStorage.setItem('allQualifications', JSON.stringify(quals));
+    }
+    function renderQualifications() {
+      const quals = getAllQualifications();
+      const groupsContainer = document.getElementById('qualificationGroups');
+      groupsContainer.innerHTML = '';
+      quals.forEach((q, idx) => {
+        const iconClass = q.icon || 'uil uil-graduation-cap';
+        const card = document.createElement('div');
+        card.className = 'qualification-card';
+        card.innerHTML = `<div class='qualification-title'><i class='${iconClass}'></i><span>${q.title}</span> <button class='remove-btn' onclick='removeQualification(${idx})'><i class='uil uil-trash'></i></button></div><div class='qualification-details'><span>${q.subtitle}</span><br><span><i class='uil uil-calendar-alt'></i> ${q.year}</span></div><button type='button' class='add-btn' onclick='showDetails(${idx})'><i class='uil uil-eye'></i> View More</button><div class='qualification-modal' id='modal-${idx}' style='display:none;'><div class='qualification-modal-content'><h4>Summary:</h4><button class='remove-btn' onclick='closeDetails(${idx})'><i class='uil uil-times'></i> Close</button><ul>${q.details.map(d => `<li><i class='uil uil-check-circle'></i> ${d}</li>`).join('')}</ul></div></div>`;
+        groupsContainer.appendChild(card);
+      });
+    }
+    function showDetails(idx) {
+      document.getElementById('modal-' + idx).style.display = 'block';
+    }
+    function closeDetails(idx) {
+      document.getElementById('modal-' + idx).style.display = 'none';
+    }
+    function addQualification() {
+      const title = document.getElementById('newQualificationTitle').value.trim();
+      const subtitle = document.getElementById('newQualificationSubtitle').value.trim();
+      const year = document.getElementById('newQualificationYear').value.trim();
+      if (!title || !subtitle || !year) return alert('Fill all fields!');
+      const quals = getAllQualifications();
+      quals.push({ title, subtitle, year, icon: 'uil uil-graduation-cap', details: [] });
+      setAllQualifications(quals);
+      document.getElementById('addQualificationForm').style.display = 'none';
+      document.getElementById('newQualificationTitle').value = '';
+      document.getElementById('newQualificationSubtitle').value = '';
+      document.getElementById('newQualificationYear').value = '';
+      renderQualifications();
+    }
+    function showModalConfirm(message, onOk) {
+      document.getElementById('modalMessage').textContent = message;
+      document.getElementById('modalConfirm').style.display = 'flex';
+      const okBtn = document.getElementById('modalOk');
+      const cancelBtn = document.getElementById('modalCancel');
+      function closeModal() {
+        document.getElementById('modalConfirm').style.display = 'none';
+        okBtn.onclick = null;
+        cancelBtn.onclick = null;
+      }
+      okBtn.onclick = function() {
+        closeModal();
+        if (onOk) onOk();
+      };
+      cancelBtn.onclick = function() {
+        closeModal();
+      };
+    }
+    function removeQualification(idx) {
+      showModalConfirm('Remove this qualification?', function() {
+        const quals = getAllQualifications();
+        quals.splice(idx, 1);
+        setAllQualifications(quals);
+        renderQualifications();
+      });
+    }
+    function showAddQualification() {
+      document.getElementById('addQualificationForm').style.display = 'block';
+    }
+    function showToast(msg) {
+      var toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(function(){ toast.classList.remove('show'); }, 2000);
+    }
+    document.querySelector('form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      showToast('Qualifications saved!');
+    });
+    function saveAllQualifications() {
+      alert('All qualifications saved!');
+    }
+    window.renderQualifications = renderQualifications;
+    window.addQualification = addQualification;
+    window.removeQualification = removeQualification;
+    window.showAddQualification = showAddQualification;
+    window.saveAllQualifications = saveAllQualifications;
+    window.showDetails = showDetails;
+    window.closeDetails = closeDetails;
+    renderQualifications();
+  </script>
+</body>
+</html>

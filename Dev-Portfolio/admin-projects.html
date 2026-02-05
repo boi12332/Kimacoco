@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - Manage Projects</title>
+  <link rel="stylesheet" href="assets/newcss.css">
+  <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.8/css/line.css" />
+  <style>
+    body { background: var(--body-color); font-family: var(--body-font); }
+    .admin-container { max-width: 1100px; margin: 4rem auto; background: #fff; border-radius: 2rem; box-shadow: 0 8px 32px rgba(0,0,0,0.10); padding: 3rem; }
+    .header-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2.5rem; }
+    .header-title { font-size: 2.3rem; color: var(--first-color); font-weight: 700; letter-spacing: 1px; }
+    .back-btn { background: var(--first-color); color: #fff; border: none; border-radius: 0.7rem; padding: 0.7rem 2rem; font-size: 1.1rem; cursor: pointer; transition: background 0.2s; display: flex; align-items: center; gap: 0.7rem; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .back-btn:hover { background: var(--first-color-alt); }
+    .add-project-btn { background: var(--first-color-alt); color: #fff; border: none; border-radius: 0.7rem; padding: 0.7rem 2rem; font-size: 1.1rem; cursor: pointer; margin-left: 1rem; transition: background 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .add-project-btn:hover { background: var(--first-color); }
+    .project-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 2.5rem; }
+    .project-card { background: var(--body-color); border-radius: 1.5rem; box-shadow: 0 4px 24px rgba(0,0,0,0.07); padding: 2rem; display: flex; flex-direction: column; gap: 1.2rem; transition: box-shadow 0.2s, transform 0.2s; }
+    .project-card:hover { box-shadow: 0 8px 32px rgba(0,0,0,0.12); transform: translateY(-4px) scale(1.02); }
+    .project-title { font-size: 1.25rem; font-weight: 700; color: var(--title-color); display: flex; align-items: center; gap: 0.7rem; margin-bottom: 0.5rem; }
+    .project-title i { font-size: 1.7rem; color: var(--first-color); }
+    .project-details { margin-bottom: 1rem; color: var(--text-color); }
+    .project-actions { display: flex; gap: 1rem; margin-bottom: 1rem; }
+    .remove-btn { background: #f44336; color: #fff; border: none; border-radius: 0.7rem; padding: 0.3rem 0.8rem; cursor: pointer; transition: background 0.2s; font-size: 1rem; }
+    .remove-btn:hover { background: #d32f2f; }
+    .add-btn, .save-btn { background: var(--first-color); color: #fff; border: none; border-radius: 0.7rem; padding: 0.7rem 2rem; font-size: 1.1rem; cursor: pointer; margin-top: 1rem; transition: background 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .add-btn:hover, .save-btn:hover { background: var(--first-color-alt); }
+    .project-img { width: 100%; border-radius: 1rem; margin-bottom: 1rem; object-fit: cover; }
+    @media (max-width: 700px) {
+      .admin-container { padding: 1rem; }
+      .project-grid { grid-template-columns: 1fr; }
+      .header-title { font-size: 1.3rem; }
+    }
+    .toast {
+      position: fixed;
+      top: 2rem;
+      right: 2rem;
+      background: var(--first-color);
+      color: #fff;
+      padding: 1rem 2rem;
+      border-radius: 0.5rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+      font-size: 1rem;
+      z-index: 9999;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+    .toast.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .modal-confirm {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 99999;
+    }
+    .modal-content {
+      background: #222;
+      color: #fff;
+      border-radius: 1rem;
+      padding: 2rem 2.5rem;
+      min-width: 320px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+      text-align: center;
+    }
+    .add-btn, .remove-btn {
+      min-width: 90px;
+    }
+  </style>
+</head>
+<body>
+  <div class="admin-container">
+    <div class="header-bar">
+      <span class="header-title"><i class="uil uil-scenery"></i> Manage Projects</span>
+      <div>
+        <button class="back-btn" onclick="window.location.href='admin-dashboard.html'"><i class="uil uil-arrow-left"></i> Back</button>
+        <button class="add-project-btn" onclick="showAddProject()"><i class="uil uil-plus"></i> Add Project</button>
+      </div>
+    </div>
+    <form onsubmit="saveAllProjects();return false;">
+      <div id="addProjectForm" style="display:none; margin-bottom:2rem;">
+        <div style="display:flex; gap:1rem; margin-bottom:1rem; flex-wrap:wrap;">
+          <input type="text" id="newProjectTitle" placeholder="Title">
+          <input type="text" id="newProjectDescription" placeholder="Description">
+          <input type="file" id="newProjectImgUpload" accept="image/*" style="max-width:200px;">
+          <input type="text" id="newProjectImg" placeholder="Image Path (or auto-filled)">
+          <input type="text" id="newProjectGithub" placeholder="GitHub Link">
+          <input type="text" id="newProjectLive" placeholder="Live Link">
+        </div>
+        <img id="projectImgPreview" src="" style="display:none;max-width:180px;border-radius:1rem;margin-bottom:1rem;" />
+        <button type="button" class="add-btn" onclick="addProject()"><i class="uil uil-plus"></i> Add Project</button>
+      </div>
+      <div class="project-grid" id="projectGroups"></div>
+      <button class="save-btn" type="submit"><i class="uil uil-save"></i> Save All</button>
+    </form>
+    <div id="toast" class="toast">Saved!</div>
+    <div id="modalConfirm" class="modal-confirm" style="display:none;">
+      <div class="modal-content">
+        <span id="modalMessage">Are you sure?</span>
+        <div style="margin-top:1.5rem; display:flex; gap:1rem; justify-content:flex-end;">
+          <button class="add-btn" id="modalOk">OK</button>
+          <button class="remove-btn" id="modalCancel">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script>
+    // Supabase config (updated)
+    const SUPABASE_URL = 'https://ezbwbhriulkxlrhioknz.supabase.co';
+    const SUPABASE_KEY = 'your-anon-key'; // Replace with your actual anon/public key from Supabase dashboard
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    // Auth check
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session) window.location.href = 'admin-login.html';
+    });
+    // Fetch and save Projects
+    async function fetchProjects() {
+      const { data, error } = await supabase.from('projects').select('*');
+      if (data) {
+        // Populate projects grid here
+      }
+      if (error) showToast('Error loading Projects');
+    }
+    async function saveProjects() {
+      // Gather and sanitize projects info
+      const { error } = await supabase.from('projects').upsert([/* ...projects array */]);
+      if (!error) showToast('Projects saved!');
+      else showToast('Error saving Projects');
+    }
+    window.onload = function() { fetchProjects(); };
+    document.querySelector('form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      saveProjects();
+    });
+    // ...existing code...
+  </script>
+</body>
+</html>

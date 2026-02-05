@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Login</title>
+  <link rel="stylesheet" href="assets/newcss.css">
+  <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.8/css/line.css" />
+  <style>
+    :root {
+      --first-color: #7C3AED;
+      --first-color-alt: #5B21B6;
+      --first-color-lighter: #C4B5FD;
+      --container-color: #f8f7fc;
+      --body-color: #f3f2f2;
+      --title-color: #1e293b;
+      --text-color: #334155;
+    }
+    * {
+      font-family: -apple-system, BlinkMacSystemFont, "San Francisco", Helvetica, Arial, sans-serif;
+      font-weight:  300; 
+      margin:  0; 
+    }
+    html, body {
+      height:  100vh; 
+      width:  100vw;
+      margin:  0 0; 
+      display:  flex; 
+      align-items:  flex-start; 
+      justify-content:  flex-start; 
+      background: linear-gradient(135deg, var(--first-color-lighter) 0%, var(--first-color) 100%);
+      min-height: 100vh;
+      font-family: var(--body-font);
+      position: relative;
+      overflow: hidden;
+    }
+    h4 {
+      font-size:  24px; 
+      font-weight:  600; 
+      color:  #000; 
+      opacity:  .85; 
+    }
+    label {
+      font-size:  12.5px; 
+      color:  #000;
+      opacity:  .8;
+      font-weight:  400; 
+    }
+    form {
+      padding:  40px 30px; 
+      background:  #fefefe; 
+      display:  flex; 
+      flex-direction:  column;
+      align-items:  flex-start; 
+      padding-bottom:  20px; 
+      width:  300px; 
+    }
+    form h4 {
+      margin-bottom:  20px;
+      color:  rgba(0,0,0, .5);
+    }
+    form h4 span {
+      color:  rgba(0,0,0, 1);
+      font-weight:  700; 
+    }
+    form p {
+      line-height:  155%; 
+      margin-bottom:  5px; 
+      font-size:  14px; 
+      color:  #000; 
+      opacity:  .65;
+      font-weight:  400; 
+      max-width:  200px; 
+      margin-bottom:  40px; 
+    }
+    a.discrete {
+      color:  rgba(0,0,0, .4); 
+      font-size:  14px; 
+      border-bottom:  solid 1px rgba(0,0,0, .0);
+      padding-bottom:  4px;  
+      margin-left:  auto; 
+      font-weight:  300; 
+      transition:  all .3s ease; 
+      margin-top:  40px; 
+    }
+    a.discrete:hover {
+      border-bottom:  solid 1px rgba(0,0,0, .2);
+    }
+    button {
+      -webkit-appearance:  none; 
+      width:  auto;
+      min-width:  100px;
+      border-radius:  24px; 
+      text-align:  center; 
+      padding:  15px 40px;
+      margin-top:  5px; 
+      background-color: var(--first-color);
+      color:  #fff; 
+      font-size:  14px;
+      margin-left:  auto; 
+      font-weight:  500; 
+      box-shadow:  0px 2px 6px -1px rgba(0,0,0,.13); 
+      border:  none;
+      transition:  all .3s ease; 
+      outline: 0; 
+    }
+    button:hover {
+      background: var(--first-color-alt);
+      transform:  translateY(-3px);
+      box-shadow:  0 2px 6px -1px rgba(182,157,230, .65);
+    }
+    button:active {
+      transform:  scale(.99);
+    }
+    input {
+      font-size:  16px; 
+      padding:  20px 0px; 
+      height:  56px; 
+      border:  none; 
+      border-bottom:  solid 1px rgba(0,0,0,.1); 
+      background:  #fff; 
+      width:  280px; 
+      box-sizing:  border-box; 
+      transition:  all .3s linear; 
+      color:  #000; 
+      font-weight:  400;
+      -webkit-appearance:  none; 
+    }
+    input:focus {
+      border-bottom:  solid 1px var(--first-color);
+      box-shadow: 0 2px 6px -8px var(--first-color-alt);
+      outline: 0; 
+    }
+    .floating-label {
+      position:  relative; 
+      margin-bottom:  10px;
+      width:  100%; 
+    }
+    .floating-label label {
+      position:  absolute; 
+      top: calc(50% - 7px);
+      left:  0; 
+      opacity:  0; 
+      transition:  all .3s ease; 
+      padding-left:  44px; 
+    }
+    .floating-label input {
+      width:  calc(100% - 44px); 
+      margin-left:  auto;
+      display:  flex; 
+    }
+    .floating-label .icon {
+      position:  absolute; 
+      top:  0; 
+      left:  0; 
+      height:  56px; 
+      width:  44px; 
+      display:  flex; 
+    }
+    .floating-label .icon svg {
+      height:  30px; 
+      width:  30px; 
+      margin:  auto;
+      opacity:  .15; 
+      transition:  all .3s ease; 
+    }
+    .floating-label .icon svg path {
+      transition:  all .3s ease; 
+    }
+    .floating-label input:not(:placeholder-shown) {
+      padding:  28px 0px 12px 0px; 
+    }
+    .floating-label input:not(:placeholder-shown) + label {
+      transform:  translateY(-10px); 
+      opacity:  .7; 
+    }
+    .floating-label input:valid:not(:placeholder-shown) + label + .icon svg {
+      opacity:  1; 
+    }
+    .floating-label input:valid:not(:placeholder-shown) + label + .icon svg path {
+      fill: var(--first-color);
+    }
+    .floating-label input:not(:valid):not(:focus) + label + .icon {
+      animation-name: shake-shake;
+      animation-duration: .3s;
+    }
+    @keyframes shake-shake {
+      0% { transform: translateX(-3px);}
+      20% { transform: translateX(3px); }
+      40% { transform: translateX(-3px);}
+      60% { transform: translateX(3px);}  
+      80% { transform: translateX(-3px);}
+      100% { transform: translateX(0px);}
+    }
+    .session {
+      display: flex;
+      flex-direction: row;
+      width: auto;
+      height: auto;
+      margin: auto auto;
+      background: #ffffff;
+      border-radius: 4px;
+      box-shadow: 0px 2px 6px -1px rgba(0,0,0,.12);
+      overflow: visible;
+      position: relative;
+      z-index: 2;
+    }
+    .left {
+      width: 220px;
+      min-height: 100%;
+      position: relative;
+      background: none;
+      border-top-left-radius: 4px;
+      border-bottom-left-radius: 4px;
+    }
+    form.log-in {
+      width: 300px;
+      min-height: 100%;
+      box-shadow: none;
+      border-radius: 0 4px 4px 0;
+    }
+    @media (max-width: 900px) {
+      .session { width: 98vw; height: auto; flex-direction: column; }
+      .left, form.log-in { width: 100%; min-height: 220px; border-radius: 4px 4px 0 0; }
+    }
+    canvas.bg-anim {
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      z-index: 0;
+      pointer-events: none;
+    }
+  </style>
+  <canvas class="bg-anim" id="bgAnim"></canvas>
+</head>
+<body>
+  <div class="session">
+    <div class="left" style="position:relative;overflow:hidden;">
+      <img src="assets/img/suha pic.jpg" alt="Suha" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;border-top-left-radius:4px;border-bottom-left-radius:4px;" />
+    </div>
+    <form action="" class="log-in" autocomplete="off" style="box-shadow:none;">
+      <h4>Im <span>Suha</span></h4>
+      <p>Welcome back! Log in to Admin account</p>
+      <div class="floating-label">
+        <input placeholder="Email" type="email" name="email" id="email" autocomplete="off" required>
+        <label for="email">Email:</label>
+        <div class="icon">
+          <svg enable-background="new 0 0 100 100" version="1.1" viewBox="0 0 100 100" xml:space="preserve">
+            <style type="text/css">.st0{fill:none;}</style>
+            <g transform="translate(0 -952.36)">
+              <path d="m17.5 977c-1.3 0-2.4 1.1-2.4 2.4v45.9c0 1.3 1.1 2.4 2.4 2.4h64.9c1.3 0 2.4-1.1 2.4-2.4v-45.9c0-1.3-1.1-2.4-2.4-2.4h-64.9zm2.4 4.8h60.2v1.2l-30.1 22-30.1-22v-1.2zm0 7l28.7 21c0.8 0.6 2 0.6 2.8 0l28.7-21v34.1h-60.2v-34.1z"/>
+            </g>
+            <rect class="st0" width="100" height="100"/>
+          </svg>
+        </div>
+      </div>
+      <div class="floating-label">
+        <input placeholder="Password" type="password" name="password" id="password" autocomplete="off" required>
+        <label for="password">Password:</label>
+        <div class="icon">
+          <svg enable-background="new 0 0 24 24" version="1.1" viewBox="0 0 24 24" xml:space="preserve" xmlns="http://www.w3.org/2000/svg">
+            <style type="text/css">.st0{fill:none;}.st1{fill:#010101;}</style>
+            <rect class="st0" width="24" height="24"/>
+            <path class="st1" d="M19,21H5V9h14V21z M6,20h12V10H6V20z"/>
+            <path class="st1" d="M16.5,10h-1V7c0-1.9-1.6-3.5-3.5-3.5S8.5,5.1,8.5,7v3h-1V7c0-2.5,2-4.5,4.5-4.5s4.5,2,4.5,4.5V10z"/>
+            <path class="st1" d="m12 16.5c-0.8 0-1.5-0.7-1.5-1.5s0.7-1.5 1.5-1.5 1.5 0.7 1.5 1.5-0.7 1.5-1.5 1.5zm0-2c-0.3 0-0.5 0.2-0.5 0.5s0.2 0.5 0.5 0.5 0.5-0.2 0.5-0.5-0.2-0.5-0.5-0.5z"/>
+          </svg>
+        </div>
+      </div>
+      <button type="submit" onclick="return false;">Log in</button>
+      <a href="" class="discrete" target="_blank">Venom X Technology</a>
+    </form>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script>
+    // Supabase config (auto-updated with your anon public API key)
+    const SUPABASE_URL = 'https://ezbwbhriulkxlrhioknz.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV6YndiaHJpdWxreGxyaGlva256Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc4NjcyMjMsImV4cCI6MjA3MzQ0MzIyM30.auhNKnw-8oOgWB93r3CIztXfih54gObehlxkfZ1nORQ';
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    // Login with Supabase Auth
+    document.querySelector('form.log-in').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      var email = document.getElementById('email').value.trim();
+      var password = document.getElementById('password').value;
+      if (!validateEmail(email)) {
+        showToast('Enter a valid email address!');
+        return false;
+      }
+      // Relaxed password validation: at least 6 characters
+      if (password.length < 6) {
+        showToast('Password must be at least 6 characters.');
+        return false;
+      }
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (!error) {
+        showToast('Login successful!');
+        setTimeout(function(){ window.location.href = 'admin-dashboard.html'; }, 1200);
+      } else {
+        showToast('Invalid credentials!');
+      }
+    });
+    // Animated background
+    const canvas = document.getElementById('bgAnim');
+    const ctx = canvas.getContext('2d');
+    let w, h;
+    function resize() {
+      w = canvas.width = window.innerWidth;
+      h = canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+    // Animated bubbles
+    const bubbles = Array.from({length: 30}, () => ({
+      x: Math.random()*w,
+      y: Math.random()*h,
+      r: 18+Math.random()*22,
+      dx: (Math.random()-0.5)*0.7,
+      dy: (Math.random()-0.5)*0.7,
+      color: `rgba(${120+Math.random()*80},${100+Math.random()*80},255,0.18)`
+    }));
+    function draw() {
+      ctx.clearRect(0,0,w,h);
+      for(const b of bubbles) {
+        ctx.beginPath();
+        ctx.arc(b.x, b.y, b.r, 0, Math.PI*2);
+        ctx.fillStyle = b.color;
+        ctx.fill();
+        b.x += b.dx;
+        b.y += b.dy;
+        if(b.x < -b.r) b.x = w+b.r;
+        if(b.x > w+b.r) b.x = -b.r;
+        if(b.y < -b.r) b.y = h+b.r;
+        if(b.y > h+b.r) b.y = -b.r;
+      }
+      requestAnimationFrame(draw);
+    }
+    draw();
+  </script>
+</body>
+</html>

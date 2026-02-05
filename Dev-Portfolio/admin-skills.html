@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - Manage Skills</title>
+  <link rel="stylesheet" href="assets/newcss.css">
+  <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.8/css/line.css" />
+  <style>
+    body { background: var(--body-color); font-family: var(--body-font); }
+    .admin-container { max-width: 1100px; margin: 4rem auto; background: #fff; border-radius: 2rem; box-shadow: 0 8px 32px rgba(0,0,0,0.10); padding: 3rem; }
+    .header-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2.5rem; }
+    .header-title { font-size: 2.3rem; color: var(--first-color); font-weight: 700; letter-spacing: 1px; }
+    .back-btn { background: var(--first-color); color: #fff; border: none; border-radius: 0.7rem; padding: 0.7rem 2rem; font-size: 1.1rem; cursor: pointer; transition: background 0.2s; display: flex; align-items: center; gap: 0.7rem; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .back-btn:hover { background: var(--first-color-alt); }
+    .add-category-btn { background: var(--first-color-alt); color: #fff; border: none; border-radius: 0.7rem; padding: 0.7rem 2rem; font-size: 1.1rem; cursor: pointer; margin-left: 1rem; transition: background 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .add-category-btn:hover { background: var(--first-color); }
+    .skills-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 2.5rem; }
+    .skills-card { background: var(--body-color); border-radius: 1.5rem; box-shadow: 0 4px 24px rgba(0,0,0,0.07); padding: 2rem; display: flex; flex-direction: column; gap: 1.2rem; transition: box-shadow 0.2s, transform 0.2s; }
+    .skills-card:hover { box-shadow: 0 8px 32px rgba(0,0,0,0.12); transform: translateY(-4px) scale(1.02); }
+    .skills-group-title { font-size: 1.25rem; font-weight: 700; color: var(--title-color); display: flex; align-items: center; gap: 0.7rem; margin-bottom: 0.5rem; }
+    .skills-group-title i { font-size: 1.7rem; color: var(--first-color); }
+    .skills-list { margin-bottom: 1rem; }
+    .skills-list-item { display: flex; align-items: center; gap: 1rem; margin-bottom: 0.7rem; }
+    .skills-list-item input { font-size: 1.08rem; padding: 0.5rem 1rem; border-radius: 0.7rem; border: 1px solid var(--first-color-lighter); background: #f5f6fa; transition: border 0.2s; }
+    .skills-list-item input:focus { border: 2px solid var(--first-color); outline: none; }
+    .remove-btn { background: #f44336; color: #fff; border: none; border-radius: 0.7rem; padding: 0.3rem 0.8rem; cursor: pointer; transition: background 0.2s; font-size: 1rem; }
+    .remove-btn:hover { background: #d32f2f; }
+    .add-btn, .save-btn { background: var(--first-color); color: #fff; border: none; border-radius: 0.7rem; padding: 0.7rem 2rem; font-size: 1.1rem; cursor: pointer; margin-top: 1rem; transition: background 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .add-btn:hover, .save-btn:hover { background: var(--first-color-alt); }
+    .category-inputs { display: flex; gap: 1rem; margin-bottom: 1rem; }
+    .category-inputs input { padding: 0.5rem 1rem; border-radius: 0.7rem; border: 1px solid var(--first-color-lighter); font-size: 1.08rem; background: #f5f6fa; }
+    .category-inputs input:focus { border: 2px solid var(--first-color); outline: none; }
+    .category-actions { display: flex; gap: 1rem; margin-bottom: 2rem; }
+    @media (max-width: 700px) {
+      .admin-container { padding: 1rem; }
+      .skills-grid { grid-template-columns: 1fr; }
+      .header-title { font-size: 1.3rem; }
+    }
+    .toast {
+      position: fixed;
+      top: 2rem;
+      right: 2rem;
+      background: var(--first-color);
+      color: #fff;
+      padding: 1rem 2rem;
+      border-radius: 0.5rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+      font-size: 1rem;
+      z-index: 9999;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+    .toast.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .modal-confirm {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 99999;
+    }
+    .modal-content {
+      background: #222;
+      color: #fff;
+      border-radius: 1rem;
+      padding: 2rem 2.5rem;
+      min-width: 320px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+      text-align: center;
+    }
+    .add-btn, .remove-btn {
+      min-width: 90px;
+    }
+  </style>
+</head>
+<body>
+  <div class="admin-container">
+    <div class="header-bar">
+      <span class="header-title"><i class="uil uil-file-alt"></i> Manage All Skills</span>
+      <div>
+        <button class="back-btn" onclick="window.location.href='admin-dashboard.html'"><i class="uil uil-arrow-left"></i> Back</button>
+        <button class="add-category-btn" onclick="showAddCategory()"><i class="uil uil-plus"></i> Add Skill Category</button>
+      </div>
+    </div>
+    <form onsubmit="saveAllSkills();return false;">
+      <div id="addCategoryForm" style="display:none; margin-bottom:2rem;">
+        <div class="category-inputs">
+          <input type="text" id="newCategoryName" placeholder="Category Name">
+        </div>
+        <button type="button" class="add-btn" onclick="addCategory()"><i class="uil uil-plus"></i> Add Category</button>
+      </div>
+      <div class="skills-grid" id="skillsGroups"></div>
+      <button class="save-btn" type="submit"><i class="uil uil-save"></i> Save All</button>
+    </form>
+    <div id="toast" class="toast">Saved!</div>
+    <div id="modalConfirm" class="modal-confirm" style="display:none;">
+      <div class="modal-content">
+        <span id="modalMessage">Are you sure?</span>
+        <div style="margin-top:1.5rem; display:flex; gap:1rem; justify-content:flex-end;">
+          <button class="add-btn" id="modalOk">OK</button>
+          <button class="remove-btn" id="modalCancel">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script>
+    // Supabase config (updated)
+    const SUPABASE_URL = 'https://ezbwbhriulkxlrhioknz.supabase.co';
+    const SUPABASE_KEY = 'your-anon-key'; // Replace with your actual anon/public key from Supabase dashboard
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    // Auth check
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session) window.location.href = 'admin-login.html';
+    });
+    // Fetch and save Skills
+    async function fetchSkills() {
+      const { data, error } = await supabase.from('skills').select('*');
+      if (data) {
+        // Populate skills grid here
+      }
+      if (error) showToast('Error loading Skills');
+    }
+    async function saveSkills() {
+      // Gather and sanitize skills info
+      const { error } = await supabase.from('skills').upsert([/* ...skills array */]);
+      if (!error) showToast('Skills saved!');
+      else showToast('Error saving Skills');
+    }
+    window.onload = function() { fetchSkills(); };
+    document.querySelector('form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      saveSkills();
+    });
+    // ...existing code...
+  </script>
+  <script>
+if(localStorage.getItem('adminLoggedIn') !== 'true') {
+  window.location.href = 'admin-login.html';
+}
+function escapeHTML(str) {
+  return str.replace(/[&<>'"/]/g, function(tag) {
+    const chars = {'&':'&amp;','<':'&lt;','>':'&gt;','\'':'&#39;','"':'&quot;','/':'&#x2F;'};
+    return chars[tag] || tag;
+  });
+}
+document.querySelectorAll('form input, form textarea').forEach(function(el) {
+  el.addEventListener('input', function() {
+    this.value = escapeHTML(this.value);
+  });
+});
+// Default skills data with icons
+    const defaultSkills = {
+      Programming: { icon: 'fas fa-pencil-ruler', items: ["C#", "Python", "JavaScript", "Css", "Html"] },
+      Technologies: { icon: 'fas fa-swatchbook', items: ["GitHub", "MongoDB", "MySQL", "Git", "SQL"] },
+      Tools: { icon: 'fas fa-tools', items: ["VS Code", "Figma", "Canva", "Postman", "Jupyter Notebook"] },
+      Constructs: { icon: 'fas fa-code', items: ["DBMS", "DS & Algorithms", "Networking", "Programming"] },
+      AI: { icon: 'fas fa-robot', items: ["ChatGPT", "Google Bard", "Midjourney", "DALL·E", "Suna"] }
+    };
+    function getAllSkills() {
+      const skills = localStorage.getItem('allSkills');
+      return skills ? JSON.parse(skills) : defaultSkills;
+    }
+    function setAllSkills(skills) {
+      localStorage.setItem('allSkills', JSON.stringify(skills));
+    }
+    function renderSkills() {
+      const skills = getAllSkills();
+      const groupsContainer = document.getElementById('skillsGroups');
+      groupsContainer.innerHTML = '';
+      Object.keys(skills).forEach(group => {
+        const iconClass = skills[group].icon || 'uil uil-file-alt';
+        const groupDiv = document.createElement('div');
+        groupDiv.className = 'skills-card';
+        groupDiv.innerHTML = `<div class='skills-group-title'><i class='${iconClass}'></i><span>${group}</span> <button class='remove-btn' onclick='removeCategory("${group}")'><i class='uil uil-trash'></i></button></div><div class='skills-list' id='skillsList-${group}'></div><button type='button' class='add-btn' onclick='addSkill("${group}")'><i class='uil uil-plus'></i> Add Skill</button>`;
+        groupsContainer.appendChild(groupDiv);
+        renderGroup(group, `skillsList-${group}`);
+      });
+    }
+    function renderGroup(group, elementId) {
+      const skills = getAllSkills();
+      const list = document.getElementById(elementId);
+      list.innerHTML = '';
+      (skills[group].items || []).forEach((skill, idx) => {
+        const div = document.createElement('div');
+        div.className = 'skills-list-item';
+        div.innerHTML = `<input type='text' value='${skill}' onchange='updateSkill("${group}",${idx},this.value)'> <button class='remove-btn' onclick='removeSkill("${group}",${idx})'><i class='uil uil-trash'></i></button>`;
+        list.appendChild(div);
+      });
+    }
+    function addSkill(group) {
+      const skills = getAllSkills();
+      if (!skills[group].items) skills[group].items = [];
+      skills[group].items.push('');
+      setAllSkills(skills);
+      renderSkills();
+    }
+    function updateSkill(group, idx, value) {
+      const skills = getAllSkills();
+      skills[group].items[idx] = value;
+      setAllSkills(skills);
+    }
+    function showModalConfirm(message, onOk) {
+      document.getElementById('modalMessage').textContent = message;
+      document.getElementById('modalConfirm').style.display = 'flex';
+      const okBtn = document.getElementById('modalOk');
+      const cancelBtn = document.getElementById('modalCancel');
+      function closeModal() {
+        document.getElementById('modalConfirm').style.display = 'none';
+        okBtn.onclick = null;
+        cancelBtn.onclick = null;
+      }
+      okBtn.onclick = function() {
+        closeModal();
+        if (onOk) onOk();
+      };
+      cancelBtn.onclick = function() {
+        closeModal();
+      };
+    }
+    function removeSkill(group, idx) {
+      showModalConfirm('Remove this skill?', function() {
+        const skills = getAllSkills();
+        skills[group].items.splice(idx, 1);
+        setAllSkills(skills);
+        renderSkills();
+      });
+    }
+    function saveAllSkills() {
+      alert('All skills saved!');
+    }
+    function showToast(msg) {
+      var toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(function(){ toast.classList.remove('show'); }, 2000);
+    }
+    document.querySelector('form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      showToast('Skills saved!');
+    });
+    function showAddCategory() {
+      document.getElementById('addCategoryForm').style.display = 'block';
+    }
+    function addCategory() {
+      const name = document.getElementById('newCategoryName').value.trim();
+      if (!name) return alert('Enter a category name!');
+      const skills = getAllSkills();
+      if (skills[name]) return alert('Category already exists!');
+      skills[name] = { icon: 'uil uil-file-alt', items: [] };
+      setAllSkills(skills);
+      document.getElementById('addCategoryForm').style.display = 'none';
+      document.getElementById('newCategoryName').value = '';
+      renderSkills();
+    }
+    function removeCategory(group) {
+      showModalConfirm('Remove this category?', function() {
+        const skills = getAllSkills();
+        delete skills[group];
+        setAllSkills(skills);
+        renderSkills();
+      });
+    }
+    window.renderSkills = renderSkills;
+    window.addSkill = addSkill;
+    window.updateSkill = updateSkill;
+    window.removeSkill = removeSkill;
+    window.saveAllSkills = saveAllSkills;
+    window.showAddCategory = showAddCategory;
+    window.addCategory = addCategory;
+    window.removeCategory = removeCategory;
+    renderSkills();
+  </script>
+</body>
+</html>

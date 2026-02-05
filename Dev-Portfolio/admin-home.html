@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin - Manage Home Section</title>
+  <link rel="stylesheet" href="assets/newcss.css" />
+  <link rel="stylesheet" href="assets/swiper-bundle.min.css" />
+  <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.0/css/line.css" />
+  <style>
+    body { background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%); }
+    .admin-container { max-width: 900px; margin: 2rem auto; padding: 2rem; border-radius: 1.5rem; background: #fff; box-shadow: 0 8px 32px rgba(60,72,88,0.12); }
+    .card-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+    .card { background: #f3f4f6; border-radius: 1rem; padding: 1.5rem; box-shadow: 0 2px 8px rgba(60,72,88,0.08); }
+    .card img { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; margin-bottom: 1rem; }
+    .actions { display: flex; gap: 1rem; margin-top: 1rem; }
+    .button { padding: 0.5rem 1.5rem; border-radius: 0.5rem; border: none; background: #6366f1; color: #fff; cursor: pointer; font-weight: 600; }
+    .button--danger { background: #ef4444; }
+    .button--secondary { background: #64748b; }
+    .toast { position: fixed; top: 2rem; right: 2rem; background: #6366f1; color: #fff; padding: 1rem 2rem; border-radius: 0.5rem; box-shadow: 0 2px 8px rgba(60,72,88,0.12); opacity: 0; transition: opacity 0.3s; z-index: 9999; }
+    .toast.show { opacity: 1; }
+    .modal { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(60,72,88,0.18); display: flex; align-items: center; justify-content: center; z-index: 9998; }
+    .modal-content { background: #fff; padding: 2rem; border-radius: 1rem; box-shadow: 0 2px 16px rgba(60,72,88,0.18); }
+    .modal-actions { display: flex; gap: 1rem; margin-top: 1rem; justify-content: flex-end; }
+    .form-group { margin-bottom: 1rem; }
+    .form-group label { font-weight: 600; display: block; margin-bottom: 0.5rem; }
+    .form-group input, .form-group textarea { width: 100%; padding: 0.5rem; border-radius: 0.5rem; border: 1px solid #cbd5e1; }
+    .social-list { display: flex; gap: 1rem; }
+    .social-list input { width: 80%; }
+    .undo-redo { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
+    .undo-redo button { background: #64748b; color: #fff; border: none; border-radius: 0.5rem; padding: 0.3rem 1rem; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div class="admin-container">
+    <h2>Manage Home Section</h2>
+    <div class="undo-redo">
+      <button id="undoBtn">Undo</button>
+      <button id="redoBtn">Redo</button>
+    </div>
+    <form id="homeForm" autocomplete="off">
+      <div class="card-grid">
+        <div class="card">
+          <label for="profileImg">Profile Image</label>
+          <img id="profilePreview" src="assets/img/profile.jpg" alt="Profile" />
+          <input type="file" id="profileImg" accept="image/*" />
+        </div>
+        <div class="card">
+          <div class="form-group">
+            <label for="name">Name</label>
+            <input type="text" id="name" required maxlength="40" />
+          </div>
+          <div class="form-group">
+            <label for="subtitle">Subtitle</label>
+            <input type="text" id="subtitle" required maxlength="60" />
+          </div>
+          <div class="form-group">
+            <label for="description">Description</label>
+            <textarea id="description" required maxlength="200"></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="card" style="margin-top:2rem;">
+        <label>Social Links</label>
+        <div class="social-list">
+          <input type="url" id="linkedin" placeholder="LinkedIn URL" required />
+          <input type="url" id="github" placeholder="GitHub URL" required />
+        </div>
+      </div>
+      <div class="actions">
+        <button type="submit" class="button">Save Changes</button>
+        <button type="button" class="button button--danger" id="resetBtn">Reset</button>
+      </div>
+    </form>
+  </div>
+  <div class="toast" id="toast"></div>
+  <div class="modal" id="modal" style="display:none;">
+    <div class="modal-content">
+      <h3>Confirm Changes</h3>
+      <p>Are you sure you want to save these changes?</p>
+      <div class="modal-actions">
+        <button class="button" id="confirmBtn">Yes</button>
+        <button class="button button--secondary" id="cancelBtn">No</button>
+      </div>
+    </div>
+  </div>
+  <script src="assets/ptj.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script>
+    // Supabase config (updated)
+    const SUPABASE_URL = 'https://ezbwbhriulkxlrhioknz.supabase.co';
+    const SUPABASE_KEY = 'your-anon-key'; // Replace with your actual anon/public key from Supabase dashboard
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    // Auth check
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session) window.location.href = 'admin-login.html';
+    });
+    // Fetch and save Home info
+    async function fetchHomeData() {
+      const { data, error } = await supabase.from('home').select('*').single();
+      if (data) {
+        document.getElementById('name').value = data.name || '';
+        document.getElementById('subtitle').value = data.subtitle || '';
+        document.getElementById('description').value = data.description || '';
+        document.getElementById('linkedin').value = data.linkedin || '';
+        document.getElementById('github').value = data.github || '';
+        document.getElementById('profilePreview').src = data.profile_img || 'assets/img/profile.jpg';
+        saveState();
+      }
+      if (error) showToast('Error loading Home info');
+    }
+    async function saveHomeData() {
+      const name = escapeHTML(document.getElementById('name').value.trim());
+      const subtitle = escapeHTML(document.getElementById('subtitle').value.trim());
+      const description = escapeHTML(document.getElementById('description').value.trim());
+      const linkedin = escapeHTML(document.getElementById('linkedin').value.trim());
+      const github = escapeHTML(document.getElementById('github').value.trim());
+      const profile_img = document.getElementById('profilePreview').src;
+      const { error } = await supabase.from('home').upsert({
+        id: 1, name, subtitle, description, linkedin, github, profile_img
+      });
+      if (!error) showToast('Home section updated!');
+      else showToast('Error saving Home info');
+    }
+    window.onload = function() {
+      fetchHomeData();
+      saveState();
+    };
+    // Undo/redo stack
+    let undoStack = [], redoStack = [];
+    function saveState() {
+      const state = {
+        name: document.getElementById('name').value,
+        subtitle: document.getElementById('subtitle').value,
+        description: document.getElementById('description').value,
+        linkedin: document.getElementById('linkedin').value,
+        github: document.getElementById('github').value,
+        profileImg: document.getElementById('profilePreview').src
+      };
+      undoStack.push(JSON.stringify(state));
+      if (undoStack.length > 20) undoStack.shift();
+      redoStack = [];
+    }
+    function restoreState(stateStr) {
+      const state = JSON.parse(stateStr);
+      document.getElementById('name').value = state.name;
+      document.getElementById('subtitle').value = state.subtitle;
+      document.getElementById('description').value = state.description;
+      document.getElementById('linkedin').value = state.linkedin;
+      document.getElementById('github').value = state.github;
+      document.getElementById('profilePreview').src = state.profileImg;
+    }
+    document.getElementById('undoBtn').onclick = function() {
+      if (undoStack.length > 1) {
+        redoStack.push(undoStack.pop());
+        restoreState(undoStack[undoStack.length-1]);
+      }
+    };
+    document.getElementById('redoBtn').onclick = function() {
+      if (redoStack.length) {
+        const state = redoStack.pop();
+        restoreState(state);
+        undoStack.push(state);
+      }
+    };
+    // Image upload/preview
+    document.getElementById('profileImg').onchange = function(e) {
+      const file = e.target.files[0];
+      if (file && file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = function(ev) {
+          document.getElementById('profilePreview').src = ev.target.result;
+          saveState();
+        };
+        reader.readAsDataURL(file);
+      }
+    };
+    // Toast
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2500);
+    }
+    // Modal
+    function showModal() {
+      document.getElementById('modal').style.display = 'flex';
+    }
+    function hideModal() {
+      document.getElementById('modal').style.display = 'none';
+    }
+    // Input sanitization
+    function escapeHTML(str) {
+      return str.replace(/[&<>'"/]/g, function(tag) {
+        const chars = { '&':'&amp;', '<':'&lt;', '>':'&gt;', "'":'&#39;', '"':'&quot;', '/':'&#47;' };
+        return chars[tag] || tag;
+      });
+    }
+    // Form validation
+    document.getElementById('homeForm').onsubmit = function(e) {
+      e.preventDefault();
+      // Validate
+      const name = document.getElementById('name').value.trim();
+      const subtitle = document.getElementById('subtitle').value.trim();
+      const description = document.getElementById('description').value.trim();
+      const linkedin = document.getElementById('linkedin').value.trim();
+      const github = document.getElementById('github').value.trim();
+      if (!name || !subtitle || !description || !linkedin || !github) {
+        showToast('All fields are required.');
+        return;
+      }
+      if (!/^https:\/\/.+linkedin\.com\/.+/.test(linkedin)) {
+        showToast('Enter a valid LinkedIn URL.');
+        return;
+      }
+      if (!/^https:\/\/.+github\.com\/.+/.test(github)) {
+        showToast('Enter a valid GitHub URL.');
+        return;
+      }
+      showModal();
+    };
+    document.getElementById('confirmBtn').onclick = function() {
+      hideModal();
+      saveState();
+      saveHomeData();
+    };
+    document.getElementById('cancelBtn').onclick = function() {
+      hideModal();
+      showToast('Changes cancelled.');
+    };
+    document.getElementById('resetBtn').onclick = function() {
+      window.location.reload();
+    };
+    // Input event listeners for undo stack
+    ['name','subtitle','description','linkedin','github'].forEach(id => {
+      document.getElementById(id).addEventListener('input', saveState);
+    });
+  </script>
+</body>
+</html>
